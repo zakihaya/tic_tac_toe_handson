@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuc_tac_toe_handson/model/tic_tac_toe.dart';
+import 'package:tuc_tac_toe_handson/provider/tic_tac_toe_provider.dart';
 
-class Board extends StatefulWidget {
+class Board extends ConsumerWidget {
   const Board({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _BoardState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ticTacToe = ref.watch(ticTacToeProvider);
 
-class _BoardState extends State<Board> {
-  // ゲームの状態
-  TicTacToe _ticTacToe = TicTacToe.start(playerX: "Dash", playerO: "Sparky");
-
-  @override
-  Widget build(BuildContext context) {
     // 画面いっぱいに描画領域だけを確保しています
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -23,7 +19,7 @@ class _BoardState extends State<Board> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              _statusMessage(_ticTacToe),
+              _statusMessage(ticTacToe),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
@@ -37,16 +33,15 @@ class _BoardState extends State<Board> {
             itemBuilder: (context, index) {
               final row = index ~/ 3; // 行番号
               final col = index % 3; // 列番号
-              final mark = _ticTacToe.board[row][col]; // マス目の状態
+              final mark = ticTacToe.board[row][col]; // マス目の状態
 
               return GestureDetector(
                 onTap: () {
-                  setState(() {
-                    final winner = _ticTacToe.getWinner();
-                    if (mark.isEmpty && winner.isEmpty) {
-                      _ticTacToe = _ticTacToe.placeMark(row, col);
-                    }
-                  });
+                  final winner = ticTacToe.getWinner();
+                  if (mark.isEmpty && winner.isEmpty) {
+                    ref.read(ticTacToeProvider.notifier).state =
+                        ticTacToe.placeMark(row, col);
+                  }
                 },
                 child: Container(
                   // マス目の罫線をgrayで描画
@@ -69,9 +64,8 @@ class _BoardState extends State<Board> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                setState(() {
-                  _ticTacToe = _ticTacToe.resetBoard();
-                });
+                ref.read(ticTacToeProvider.notifier).state =
+                    ticTacToe.resetBoard();
               },
               child: const Text("ゲームをリセット"),
             ),
