@@ -19,6 +19,15 @@ class _BoardState extends State<Board> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          // メッセージを表示
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              _statusMessage(_ticTacToe),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          // 盤面
           GridView.builder(
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -53,9 +62,36 @@ class _BoardState extends State<Board> {
                 ),
               );
             },
+          ),
+          const SizedBox(height: 16),
+          // リセットボタン
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _ticTacToe = _ticTacToe.resetBoard();
+                });
+              },
+              child: const Text("ゲームをリセット"),
+            ),
           )
         ],
       ),
     );
+  }
+
+  /// 今回の指し手や、勝利か引き分けかのメッセージを作成
+  String _statusMessage(TicTacToe ticTacToe) {
+    final winner = ticTacToe.getWinner();
+    final isDraw = ticTacToe.isDraw();
+
+    if (winner.isNotEmpty) {
+      return "$winnerの勝ち";
+    } else if (isDraw) {
+      return "引き分けです";
+    } else {
+      return "${ticTacToe.currentPlayer}の番";
+    }
   }
 }
